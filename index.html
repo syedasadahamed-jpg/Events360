@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Events360 - Pan India Instant Event Network</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #090d16; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+    .app-shell { width: 100%; max-width: 440px; background: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position: relative; }
+    .hidden { display: none !important; }
+
+    /* Header & Banners */
+    .topbar { background: #020617; color: #ffffff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 30; }
+    .brand { font-size: 17px; font-weight: 900; letter-spacing: -0.5px; }
+    .brand span { color: #fbbf24; }
+    .role-badge { background: #4f46e5; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
+    .user-sub { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+    .top-actions { display: flex; gap: 6px; }
+    .btn-sm { border: none; border-radius: 8px; padding: 6px 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
+    .btn-dark { background: #1e293b; color: #ffffff; }
+    .btn-logout { background: #e11d48; color: #ffffff; }
+    .fraud-banner { background: #fcd34d; color: #020617; padding: 7px 12px; font-size: 10px; font-weight: 800; line-height: 1.35; }
+
+    /* Cards & Inputs */
+    .content { padding: 14px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+    .card { background: #ffffff; border-radius: 16px; padding: 15px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px; }
+    .card-dark { background: #0f172a; color: #ffffff; border-radius: 16px; padding: 15px; }
+    .card-emerald { background: #064e3b; color: #ffffff; border-radius: 16px; padding: 16px; }
+    .card-title { font-size: 14px; font-weight: 900; color: #0f172a; }
+    .label { font-size: 10px; font-weight: 800; color: #475569; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .input, .select, .textarea { width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 9px 11px; font-size: 12px; font-weight: 600; background: #ffffff; color: #0f172a; outline: none; }
+    .input:focus, .select:focus, .textarea:focus { border-color: #4f46e5; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+
+    /* Buttons */
+    .btn { width: 100%; border: none; border-radius: 11px; padding: 11px; font-size: 12px; font-weight: 900; cursor: pointer; text-align: center; }
+    .btn-primary { background: #020617; color: #fbbf24; }
+    .btn-indigo { background: #4f46e5; color: #ffffff; }
+    .btn-emerald { background: #059669; color: #ffffff; }
+    .btn-amber { background: #fbbf24; color: #020617; }
+    .btn-outline { background: #eef2ff; color: #1e1b4b; border: 1px solid #c7d2fe; }
+    .btn-outline-green { background: #ecfdf5; color: #064e3b; border: 1px solid #a7f3d0; }
+
+    /* Auth Screen */
+    .auth-wrap { background: linear-gradient(180deg, #020617 0%, #1e1b4b 60%, #0f172a 100%); min-height: 100vh; padding: 20px 16px; color: #ffffff; display: flex; flex-direction: column; gap: 16px; }
+    .pill-gold { background: #fbbf24; color: #020617; font-size: 10px; font-weight: 900; padding: 4px 12px; border-radius: 99px; display: inline-block; text-transform: uppercase; }
+    .role-btn { padding: 10px; border-radius: 10px; font-size: 11px; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer; }
+    .role-btn.active { background: #020617; color: #fbbf24; border-color: #020617; }
+
+    /* Gallery & Radar */
+    .decor-card { border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; cursor: pointer; background: #f8fafc; }
+    .decor-card.selected { border-color: #f59e0b; background: #fffbeb; }
+    .decor-thumb { height: 70px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; color: #ffffff; text-align: center; padding: 6px; }
+    .decor-meta { padding: 7px; font-size: 10px; }
+    .radar-box { background: #020617; color: #ffffff; border: 2px solid #fbbf24; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; animation: pulseBorder 1.6s infinite; }
+    @keyframes pulseBorder { 0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.6); } 50% { box-shadow: 0 0 0 8px rgba(251,191,36,0); } }
+
+    .info-box { background: #f1f5f9; border-radius: 10px; padding: 10px; font-size: 11px; line-height: 1.5; }
+    .alert-amber { background: #fffbeb; border: 1px solid #fde68a; color: #78350f; padding: 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .alert-green { background: #ecfdf5; border: 1px solid #a7f3d0; color: #064e3b; padding: 10px; border-radius: 10px; font-size: 11px; font-weight: 800; }
+    .tag { display: inline-block; background: #e0e7ff; color: #1e1b4b; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+    .cat-chip { display: inline-flex; align-items: center; gap: 6px; background: #eef2ff; border: 1px solid #c7d2fe; color: #1e1b4b; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 99px; margin: 2px; }
+    .preview-img { width: 100%; max-height: 130px; object-fit: cover; border-radius: 10px; border: 1px solid #cbd5e1; margin-top: 6px; }
+    .lock-screen { background: #020617; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; gap: 12px; }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="app"></div>
+
+<script>
+  // COMPLETE PAN-INDIA 28 STATES & 8 UNION TERRITORIES WITH CITIES
+  const PAN_INDIA = {
+    "Andhra Pradesh": ["Rayachoty", "Tirupati", "Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Kadapa", "Anantapur", "Rajahmundry", "Kakinada", "Eluru", "Ongole", "Chittoor"],
+    "Arunachal Pradesh": ["Itanagar", "Naharlagun", "Pasighat", "Tawang", "Ziro"],
+    "Assam": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tinsukia", "Tezpur"],
+    "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Arrah", "Begusarai"],
+    "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Jagdalpur"],
+    "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda"],
+    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar"],
+    "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar", "Karnal"],
+    "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Solan", "Mandi", "Kullu"],
+    "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh"],
+    "Karnataka": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi", "Kalaburagi", "Davanagere", "Ballari", "Shivamogga", "Tumakuru"],
+    "Kerala": ["Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur", "Kollam", "Kannur", "Alappuzha", "Palakkad"],
+    "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas", "Satna"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Chhatrapati Sambhajinagar", "Solapur", "Kolhapur", "Amravati", "Navi Mumbai"],
+    "Manipur": ["Imphal", "Thoubal", "Bishnupur", "Churachandpur"],
+    "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh"],
+    "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip"],
+    "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang"],
+    "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Berhampur", "Sambalpur", "Puri", "Balasore"],
+    "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Pathankot"],
+    "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner", "Ajmer", "Bhilwara", "Alwar"],
+    "Sikkim": ["Gangtok", "Namchi", "Gyalshing", "Mangan"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode", "Vellore", "Thoothukudi", "Thanjavur"],
+    "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Khammam", "Karimnagar", "Ramagundam", "Mahbubnagar", "Nalgonda"],
+    "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar"],
+    "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly", "Aligarh", "Moradabad", "Noida", "Gorakhpur"],
+    "Uttarakhand": ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rudrapur", "Rishikesh"],
+    "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Bardhaman", "Malda", "Kharagpur"],
+    "Andaman & Nicobar Islands": ["Port Blair", "Diglipur"],
+    "Chandigarh": ["Chandigarh"],
+    "Dadra & Nagar Haveli and Daman & Diu": ["Daman", "Diu", "Silvassa"],
+    "Delhi (NCT)": ["New Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi", "Dwarka", "Rohini"],
+    "Jammu & Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Udhampur"],
+    "Ladakh": ["Leh", "Kargil"],
+    "Lakshadweep": ["Kavaratti", "Agatti"],
+    "Puducherry": ["Puducherry", "Karaikal", "Mahe", "Yanam"]
+  };
+
+  // APPLICATION STATE
+  const state = {
+    view: "login", // login | vendor_reg | verify_reg
+    loginRole: "customer",
+    mobile: "",
+    otpSent: false,
+    otpVal: "",
+    user: null, // strictly isolated active user
+    locked: false,
+    helpOpen: false,
+    tickets: [],
+
+    categories: ["Wedding Decor", "Birthday Party", "Corporate Event", "Catering & Sound", "Photography"],
+    gallery: [
+      { id: 1, title: "Royal Flower Mandap", min: 3000, max: 15000, color: "#be123c", img: "" },
+      { id: 2, title: "LED Reception Stage", min: 15001, max: 50000, color: "#4338ca", img: "" },
+      { id: 3, title: "Grand Palace Setup", min: 50001, max: 500000, color: "#b45309", img: "" }
+    ],
+
+    verifyTeam: [
+      { id: "VT-101", name: "Ramesh Kumar (Rayachoty)", mobile: "9876543210", state: "Andhra Pradesh", city: "Rayachoty", govId: "AADHAAR-8821", shopPhoto: "Attached" }
+    ],
+
+    vendors: [
+      {
+        id: "VND-01",
+        name: "Sri Venkateswara Events",
+        mobile: "9988776655",
+        state: "Andhra Pradesh",
+        city: "Rayachoty",
+        category: "Wedding Decor",
+        govId: "PAN-ABCDE1234F",
+        googleAddress: "Near RTC Bus Stand, Rayachoty, AP",
+        socialLinks: "instagram.com/srivenkateswaraevents",
+        shopPhoto: "Uploaded",
+        kycVerified: true,
+        linkedVerifyId: "VT-101",
+        blockedDates: []
+      }
+    ],
+
+    // Customer form state
+    cState: "Andhra Pradesh",
+    cCity: "Rayachoty",
+    cDate: "2026-12-20",
+    cCat: "Wedding Decor",
+    cBudget: "5000",
+    cVenue: "",
+    cSelectedDecorId: 1,
+    cSampleImg: "",
+    cNote: "",
+
+    // Vendor reg form
+    vState: "Andhra Pradesh",
+    vCity: "Rayachoty",
+    vShopImg: "",
+    vGovImg: "",
+
+    // Verify reg form
+    vtState: "Andhra Pradesh",
+    vtCity: "Rayachoty",
+    vtShopImg: "",
+
+    // Admin decor upload
+    admDecorImg: "",
+
+    orders: []
+  };
+
+  function readImage(inputEl, targetKey) {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      state[targetKey] = e.target.result;
+      render();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function render() {
+    const root = document.getElementById("app");
+
+    // 1. LOCK SCREEN
+    if (state.locked) {
+      root.innerHTML = `
+        <div class="lock-screen">
+          <div style="font-size:38px;">🔒</div>
+          <h2 style="font-size:18px;font-weight:900;">Events360 Screen Locked</h2>
+          <p style="font-size:12px;color:#94a3b8;">Enter 4-Digit Security PIN (Demo PIN: 0000)</p>
+          <input id="pinField" type="password" maxlength="4" placeholder="••••" class="input" style="max-width:180px;text-align:center;font-size:20px;letter-spacing:6px;" />
+          <button class="btn btn-amber" style="max-width:180px;" onclick="unlockApp()">Unlock Screen</button>
+        </div>
+      `;
+      return;
+    }
+
+    // 2. AUTH & SELF-REGISTRATION SCREENS
+    if (!state.user) {
+      if (state.view === "login") {
+        root.innerHTML = `
+          <div class="auth-wrap">
+            <div style="text-align:center;margin-top:10px;">
+              <span class="pill-gold">Pan-India Instant Event Network</span>
+              <h1 style="font-size:30px;font-weight:900;margin-top:8px;">Events<span style="color:#fbbf24;">360</span></h1>
+              <p style="font-size:12px;color:#cbd5e1;">Rapido-Speed Vendor Dispatch & Escrow Protection</p>
+            </div>
+
+            <div class="card">
+              <span class="label">Select Account Role</span>
+              <div class="grid-2">
+                <button class="role-btn ${state.loginRole === 'customer' ? 'active' : ''}" onclick="setRole('customer')">👤 Customer</button>
+                <button class="role-btn ${state.loginRole === 'vendor' ? 'active' : ''}" onclick="setRole('vendor')">⚡ Vendor Partner</button>
+                <button class="role-btn ${state.loginRole === 'verify' ? 'active' : ''}" onclick="setRole('verify')">🛡️ Verify Team</button>
+                <button class="role-btn ${state.loginRole === 'admin' ? 'active' : ''}" onclick="setRole('admin')">👑 Admin</button>
+              </div>
+
+              <div>
+                <span class="label">Mobile Number (+91)</span>
+                <input id="mobInput" type="tel" maxlength="10" value="${escapeHtml(state.mobile)}" oninput="state.mobile=this.value" placeholder="Enter 10-digit mobile number" class="input" />
+                ${state.loginRole === 'vendor' ? '<p style="font-size:10px;color:#64748b;margin-top:4px;">Demo Verified Vendor: <b>9988776655</b></p>' : ''}
+                ${state.loginRole === 'verify' ? '<p style="font-size:10px;color:#64748b;margin-top:4px;">Demo Verify Agent: <b>9876543210</b></p>' : ''}
+              </div>
+
+              ${state.otpSent ? `
+                <div>
+                  <span class="label" style="color:#059669;">Enter 4-Digit SMS OTP (Demo: 1234)</span>
+                  <input id="otpField" type="text" maxlength="4" value="${escapeHtml(state.otpVal)}" oninput="state.otpVal=this.value" placeholder="1234" class="input" style="text-align:center;font-size:18px;letter-spacing:6px;border-color:#059669;" />
+                </div>
+              ` : ''}
+
+              <button class="btn btn-amber" onclick="handleAuthSubmit()">${state.otpSent ? 'Verify OTP & Login' : 'Get Mobile OTP'}</button>
+
+              <div style="border-top:1px solid #e2e8f0;padding-top:10px;display:flex;flex-direction:column;gap:8px;">
+                <button class="btn btn-outline" onclick="state.view='vendor_reg';render();">+ New Vendor Self-Registration (eKYC & Shop)</button>
+                <button class="btn btn-outline-green" onclick="state.view='verify_reg';render();">+ Join Verify Team (4% Lifetime Commission)</button>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.view === "vendor_reg") {
+        const stateOpts = Object.keys(PAN_INDIA).map(s => `<option ${s === state.vState ? 'selected' : ''}>${s}</option>`).join("");
+        const cityOpts = PAN_INDIA[state.vState].map(c => `<option ${c === state.vCity ? 'selected' : ''}>${c}</option>`).join("");
+        root.innerHTML = `
+          <div class="auth-wrap">
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h2 class="card-title">⚡ Vendor Self-Registration (eKYC)</h2>
+                <button class="btn-sm btn-dark" onclick="state.view='login';render();">← Back</button>
+              </div>
+              <input id="vrName" class="input" placeholder="Shop / Business Name *" />
+              <input id="vrMob" type="tel" maxlength="10" class="input" placeholder="Mobile Number (+91) *" />
+              <div class="grid-2">
+                <select class="select" onchange="state.vState=this.value;state.vCity=PAN_INDIA[this.value][0];render();">${stateOpts}</select>
+                <select class="select" onchange="state.vCity=this.value;">${cityOpts}</select>
+              </div>
+              <input id="vrCat" class="input" placeholder="Custom Work Category (e.g. Mandap Decor, DJ)" />
+              <input id="vrGov" class="input" placeholder="Government ID Number (Aadhaar / PAN / GST) *" />
+              <input id="vrAddr" class="input" placeholder="Google Maps Shop Address / Landmark *" />
+              <input id="vrSoc" class="input" placeholder="Instagram / YouTube / Facebook Work Link" />
+              <div class="grid-2">
+                <label class="info-box" style="text-align:center;cursor:pointer;">
+                  <b>📸 Shop Photo</b><br/>
+                  <span style="color:#059669;">${state.vShopImg ? 'Attached ✓' : 'Tap to upload'}</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="readImage(this,'vShopImg')" />
+                </label>
+                <label class="info-box" style="text-align:center;cursor:pointer;">
+                  <b>🪪 Gov ID Photo</b><br/>
+                  <span style="color:#059669;">${state.vGovImg ? 'Attached ✓' : 'Tap to upload'}</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="readImage(this,'vGovImg')" />
+                </label>
+              </div>
+              <button class="btn btn-indigo" onclick="submitVendorReg()">Submit eKYC & E-Sign Agreement</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.view === "verify_reg") {
+        const stateOpts = Object.keys(PAN_INDIA).map(s => `<option ${s === state.vtState ? 'selected' : ''}>${s}</option>`).join("");
+        const cityOpts = PAN_INDIA[state.vtState].map(c => `<option ${c === state.vtCity ? 'selected' : ''}>${c}</option>`).join("");
+        root.innerHTML = `
+          <div class="auth-wrap">
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h2 class="card-title">🛡️ Verify Team eKYC Registration</h2>
+                <button class="btn-sm btn-dark" onclick="state.view='login';render();">← Back</button>
+              </div>
+              <input id="vtrName" class="input" placeholder="Agent Full Name *" />
+              <input id="vtrMob" type="tel" maxlength="10" class="input" placeholder="Mobile Number (+91) *" />
+              <div class="grid-2">
+                <select class="select" onchange="state.vtState=this.value;state.vtCity=PAN_INDIA[this.value][0];render();">${stateOpts}</select>
+                <select class="select" onchange="state.vtCity=this.value;">${cityOpts}</select>
+              </div>
+              <input id="vtrGov" class="input" placeholder="Government ID (Aadhaar / PAN) *" />
+              <label class="info-box" style="text-align:center;cursor:pointer;">
+                <b>📸 Upload Office / Shop Photo (eKYC)</b><br/>
+                <span style="color:#059669;">${state.vtShopImg ? 'Photo Attached ✓' : 'Tap to upload'}</span>
+                <input type="file" accept="image/*" class="hidden" onchange="readImage(this,'vtShopImg')" />
+              </label>
+              <button class="btn btn-emerald" onclick="submitVerifyReg()">Complete eKYC & E-Sign Agent Agreement</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+    }
+
+    // 3. STRICTLY ISOLATED LOGGED-IN PORTAL (NO OTHER ROLE TABS DISPLAYED)
+    let headerHtml = `
+      <header class="topbar">
+        <div>
+          <div class="brand">Events<span>360</span><span class="role-badge">${escapeHtml(state.user.role)}</span></div>
+          <div class="user-sub">${escapeHtml(state.user.name)}</div>
+        </div>
+        <div class="top-actions">
+          <button class="btn-sm btn-dark" onclick="state.helpOpen=!state.helpOpen;render();">🎧 Help</button>
+          <button class="btn-sm btn-dark" onclick="state.locked=true;render();">🔒</button>
+          <button class="btn-sm btn-logout" onclick="logoutUser()">Logout ⏻</button>
+        </div>
+      </header>
+      <div class="fraud-banner">
+        ⚠️ Pay ONLY inside Events360 App. No cash, no personal QR/barcode, no direct vendor dealing. Events360 is not responsible for outside payments.
+      </div>
+    `;
+
+    if (state.helpOpen) {
+      const ticketItems = state.tickets.map(t => `<div class="info-box"><b>[${escapeHtml(t.role)}]</b> ${escapeHtml(t.msg)}</div>`).join("");
+      headerHtml += `
+        <div class="card" style="margin:10px;border:2px solid #4f46e5;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="card-title">🎧 24x7 Support Desk</span>
+            <button class="btn-sm btn-logout" onclick="state.helpOpen=false;render();">✕</button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <input id="helpInput" class="input" placeholder="Describe your issue..." />
+            <button class="btn-sm btn-indigo" onclick="sendHelpTicket()">Send</button>
+          </div>
+          ${ticketItems}
+        </div>
+      `;
+    }
+
+    // ================= PANEL A: CUSTOMER ONLY =================
+    if (state.user.role === "customer") {
+      const stateOpts = Object.keys(PAN_INDIA).map(s => `<option ${s === state.cState ? 'selected' : ''}>${s}</option>`).join("");
+      const cityOpts = PAN_INDIA[state.cState].map(c => `<option ${c === state.cCity ? 'selected' : ''}>${c}</option>`).join("");
+      const catOpts = state.categories.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
+      const budgetNum = Number(state.cBudget) || 0;
+
+      const matchedGallery = state.gallery
+        .filter(g => budgetNum >= g.min || g.id === 1)
+        .map(g => `
+          <div class="decor-card ${state.cSelectedDecorId === g.id ? 'selected' : ''}" onclick="state.cSelectedDecorId=${g.id};render();">
+            ${g.img ? `<img src="${g.img}" style="width:100%;height:70px;object-fit:cover;" />` : `<div class="decor-thumb" style="background:${g.color};">${escapeHtml(g.title)}</div>`}
+            <div class="decor-meta">
+              <b>${escapeHtml(g.title)}</b><br/>
+              <span style="color:#64748b;">₹${g.min} - ₹${g.max}</span>
+            </div>
+          </div>
+        `).join("");
+
+      const myOrdersHtml = state.orders
+        .filter(o => o.customerMobile === state.user.mobile)
+        .map(o => `
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><span class="tag">${o.id}</span> <b style="font-size:13px;">${escapeHtml(o.city)}, ${escapeHtml(o.state)}</b></div>
+              <b style="font-size:15px;color:#4f46e5;">₹${o.customerPrice}</b>
+            </div>
+            <p style="font-size:11px;color:#475569;"><b>Date:</b> ${o.date} | <b>Category:</b> ${escapeHtml(o.category)}<br/><b>Venue:</b> ${escapeHtml(o.venue)}</p>
+            ${o.sampleImg ? `<img src="${o.sampleImg}" class="preview-img" />` : ''}
+            ${(o.status === "WAITING_ADMIN" || o.status === "BROADCASTED") ? `
+              <div class="alert-amber">⏳ Assigning verified specialist in <b>${escapeHtml(o.city)}</b>...</div>
+            ` : `
+              <div class="alert-green">✅ Confirmed Partner: ${escapeHtml(o.assignedVendorName)}</div>
+              ${!o.customerSigned ? `<button class="btn btn-indigo" onclick="updOrder('${o.id}',{customerSigned:true})">✍️ E-Sign Customer–Admin Agreement</button>` : `<p style="font-size:11px;color:#059669;font-weight:800;">✔️ E-Sign Agreement Completed</p>`}
+              ${o.customerSigned && !o.paid60 ? `<button class="btn btn-emerald" onclick="updOrder('${o.id}',{paid60:true})">Pay 60% Booking Advance (₹${Math.round(o.customerPrice * 0.6)})</button>` : ''}
+              ${o.paid60 ? `<p style="font-size:11px;color:#059669;font-weight:800;">✔️ 60% Advance Paid (₹${Math.round(o.customerPrice * 0.6)})</p>` : ''}
+              ${o.paid60 && !o.paid30 ? `<button class="btn btn-emerald" onclick="updOrder('${o.id}',{paid30:true})">Pay 30% Pre-Event Installment (₹${Math.round(o.customerPrice * 0.3)})</button>` : ''}
+              ${o.paid30 ? `<p style="font-size:11px;color:#059669;font-weight:800;">✔️ 30% Pre-Event Paid (₹${Math.round(o.customerPrice * 0.3)})</p>` : ''}
+              ${o.photosUploaded && !o.completed ? `
+                <div class="alert-amber" style="display:flex;flex-direction:column;gap:8px;">
+                  <b>📸 Vendor Uploaded 3 Work Completion Photos!</b>
+                  <div class="grid-3">
+                    <div style="background:#059669;color:#fff;padding:12px 4px;border-radius:8px;text-align:center;font-size:10px;font-weight:800;">Photo 1 ✓</div>
+                    <div style="background:#059669;color:#fff;padding:12px 4px;border-radius:8px;text-align:center;font-size:10px;font-weight:800;">Photo 2 ✓</div>
+                    <div style="background:#059669;color:#fff;padding:12px 4px;border-radius:8px;text-align:center;font-size:10px;font-weight:800;">Photo 3 ✓</div>
+                  </div>
+                  <div style="background:#fff;padding:8px;border-radius:8px;text-align:center;border:1px solid #cbd5e1;">
+                    <span style="font-size:10px;color:#64748b;">Share 4-Digit OTP with Vendor after checking work:</span><br/>
+                    <b style="font-size:18px;letter-spacing:5px;color:#4f46e5;">${o.otp}</b>
+                  </div>
+                  <button class="btn btn-primary" onclick="updOrder('${o.id}',{completed:true})">Pay Final 10% (₹${Math.round(o.customerPrice * 0.1)}) & Confirm OTP</button>
+                </div>
+              ` : ''}
+              ${o.completed ? `<div class="alert-green" style="text-align:center;">🎉 Event Completed & 100% Settled!</div>` : ''}
+            `}
+          </div>
+        `).join("");
+
+      root.innerHTML = `
+        ${headerHtml}
+        <main class="content">
+          <div class="card">
+            <h2 class="card-title">Book Event Anywhere in Pan India</h2>
+            <div class="grid-2">
+              <div>
+                <span class="label">State (All India)</span>
+                <select class="select" onchange="state.cState=this.value;state.cCity=PAN_INDIA[this.value][0];render();">${stateOpts}</select>
+              </div>
+              <div>
+                <span class="label">City</span>
+                <select class="select" onchange="state.cCity=this.value;">${cityOpts}</select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <span class="label">Event Date</span>
+                <input type="date" class="input" value="${state.cDate}" onchange="state.cDate=this.value;" />
+              </div>
+              <div>
+                <span class="label">Category (Custom/List)</span>
+                <input list="cats" class="input" value="${escapeHtml(state.cCat)}" oninput="state.cCat=this.value;" placeholder="Type or choose" />
+                <datalist id="cats">${catOpts}</datalist>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div>
+                <span class="label">Your Custom Budget (₹)</span>
+                <input type="number" class="input" value="${escapeHtml(state.cBudget)}" oninput="state.cBudget=this.value;render();" />
+              </div>
+              <div>
+                <span class="label">Venue / Function Hall</span>
+                <input class="input" value="${escapeHtml(state.cVenue)}" oninput="state.cVenue=this.value;" placeholder="Hall name & area" />
+              </div>
+            </div>
+            <div>
+              <span class="label">Designs Matching ₹${budgetNum} Budget (Tap to Select)</span>
+              <div class="grid-2">${matchedGallery}</div>
+            </div>
+            <div class="info-box">
+              <span class="label" style="color:#1e1b4b;">📸 Upload Your Own Sample Design Photo</span>
+              <input type="file" accept="image/*" onchange="readImage(this,'cSampleImg')" style="font-size:11px;width:100%;" />
+              ${state.cSampleImg ? `<img src="${state.cSampleImg}" class="preview-img" />` : ''}
+              <textarea rows="2" class="textarea" style="margin-top:6px;" placeholder="Describe custom theme details..." oninput="state.cNote=this.value;">${escapeHtml(state.cNote)}</textarea>
+            </div>
+            <button class="btn btn-primary" onclick="submitCustomerOrder()">Submit Event Request</button>
+          </div>
+          ${myOrdersHtml}
+        </main>
+      `;
+      return;
+    }
+
+    // ================= PANEL B: VENDOR ONLY =================
+    if (state.user.role === "vendor") {
+      const me = state.vendors.find(v => v.id === state.user.id) || state.vendors[0];
+
+      const radarLeads = state.orders
+        .filter(o => o.status === "BROADCASTED" && o.city === me.city && me.kycVerified && !me.blockedDates.includes(o.date))
+        .map(lead => {
+          const vFee = Math.round(lead.vendorDealPrice * 0.04);
+          const net = lead.vendorDealPrice - vFee;
+          return `
+            <div class="radar-box">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="pill-gold">⚡ Instant Lead in ${escapeHtml(lead.city)}</span>
+                <span style="font-size:11px;font-weight:800;color:#fde68a;">${lead.date}</span>
+              </div>
+              <h3 style="font-size:15px;font-weight:900;">${escapeHtml(lead.category)}</h3>
+              <p style="font-size:11px;color:#cbd5e1;">Venue: ${escapeHtml(lead.venue)}</p>
+              ${lead.sampleImg ? `<img src="${lead.sampleImg}" class="preview-img" />` : ''}
+              <div style="background:#0f172a;padding:10px;border-radius:10px;font-size:11px;">
+                Deal Offer: <b style="color:#fbbf24;font-size:14px;">₹${lead.vendorDealPrice}</b><br/>
+                <span style="color:#94a3b8;">4% Verify Team Fee (₹${vFee}) deducted after completion. Net: ₹${net}</span>
+              </div>
+              <button class="btn btn-emerald" onclick="acceptLead('${lead.id}','${me.id}','${escapeHtml(me.name)}','${me.linkedVerifyId || ''}')">ACCEPT ORDER FIRST ⚡</button>
+            </div>
+          `;
+        }).join("");
+
+      const myJobs = state.orders
+        .filter(o => o.assignedVendorId === me.id)
+        .map(job => {
+          const vFee = Math.round(job.vendorDealPrice * 0.04);
+          const net = job.vendorDealPrice - vFee;
+          return `
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="tag">Active Job ${job.id}</span>
+                <b style="color:#059669;font-size:13px;">Net: ₹${net}</b>
+              </div>
+              <p style="font-size:11px;color:#475569;">${job.date} • ${escapeHtml(job.venue)}<br/>Deal: ₹${job.vendorDealPrice} | Verify Team 4%: -₹${vFee}</p>
+              ${!job.vendorSigned ? `<button class="btn btn-indigo" onclick="updOrder('${job.id}',{vendorSigned:true})">✍️ E-Sign Vendor–Admin Agreement</button>` : `<p style="font-size:11px;color:#059669;font-weight:800;">✔️ Vendor Agreement Signed</p>`}
+              <p style="font-size:11px;"><b>Advance Status:</b> ${job.advanceApproved ? '<span style="color:#059669;font-weight:800;">✅ Released by Admin</span>' : '<span style="color:#d97706;font-weight:700;">⏳ Awaiting Customer Advance & Approval</span>'}</p>
+              ${job.advanceApproved && !job.photosUploaded ? `<button class="btn btn-amber" onclick="updOrder('${job.id}',{photosUploaded:true})">📸 Upload 3 Completion Photos & Send Customer OTP</button>` : ''}
+              ${job.photosUploaded && !job.completed ? `
+                <div class="info-box" style="display:flex;flex-direction:column;gap:6px;">
+                  <b>Enter Customer 4-Digit Completion OTP:</b>
+                  <div style="display:flex;gap:6px;">
+                    <input id="vOtp_${job.id}" class="input" placeholder="4-digit OTP" style="text-align:center;" />
+                    <button class="btn-sm btn-indigo" onclick="verifyVendorOtp('${job.id}','${job.otp}')">Verify</button>
+                  </div>
+                </div>
+              ` : ''}
+              ${job.completed ? `<div class="alert-green">💰 Completed! ₹${net} settled (₹${vFee} 4% routed to Verify Team).</div>` : ''}
+            </div>
+          `;
+        }).join("");
+
+      root.innerHTML = `
+        ${headerHtml}
+        <main class="content">
+          <div class="card-dark" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:900;">${escapeHtml(me.name)}</div>
+              <div style="font-size:10px;color:#94a3b8;">${escapeHtml(me.city)} • ${escapeHtml(me.category)}</div>
+            </div>
+            <span class="pill-gold">${me.kycVerified ? '✅ KYC Verified' : '⏳ Pending Shop Check'}</span>
+          </div>
+          ${radarLeads}
+          ${myJobs}
+          <div class="card">
+            <h3 class="card-title">📅 Block Busy Dates (Stop Lead Pop-Ups)</h3>
+            <div style="display:flex;gap:6px;">
+              <input id="blkDate" type="date" class="input" />
+              <button class="btn-sm btn-dark" onclick="blockVendorDate('${me.id}')">Block</button>
+            </div>
+            ${me.blockedDates.length ? `<p style="font-size:11px;color:#e11d48;font-weight:800;">Blocked: ${me.blockedDates.join(", ")}</p>` : ''}
+          </div>
+        </main>
+      `;
+      return;
+    }
+
+    // ================= PANEL C: VERIFY TEAM ONLY =================
+    if (state.user.role === "verify") {
+      const vt = state.verifyTeam.find(a => a.id === state.user.id) || state.verifyTeam[0];
+      const linkedIds = state.vendors.filter(v => v.linkedVerifyId === vt.id).map(v => v.id);
+      const completedJobs = state.orders.filter(o => o.completed && linkedIds.includes(o.assignedVendorId));
+      const totalComm = completedJobs.reduce((sum, o) => sum + Math.round(o.vendorDealPrice * 0.04), 0);
+
+      const cityVendorsHtml = state.vendors
+        .filter(v => v.city === vt.city)
+        .map(v => `
+          <div class="info-box" style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;">
+              <b>${escapeHtml(v.name)}</b>
+              <span style="font-weight:800;color:${v.kycVerified ? '#059669' : '#d97706'};">${v.kycVerified ? '✅ Verified' : '⏳ Pending Visit'}</span>
+            </div>
+            <p style="font-size:10px;color:#475569;">📍 ${escapeHtml(v.googleAddress)} | ID: ${escapeHtml(v.govId)}<br/>Category: <b>${escapeHtml(v.category)}</b></p>
+            ${(!v.kycVerified || v.linkedVerifyId !== vt.id) ? `
+              <button class="btn btn-emerald" onclick="verifyAndClaimVendor('${v.id}','${vt.id}')">Verify Shop & Merge to My List (4% Commission)</button>
+            ` : `<span style="font-size:10px;color:#059669;font-weight:800;">🔗 Linked to Your 4% Commission List</span>`}
+          </div>
+        `).join("");
+
+      const pendingApprovalsHtml = state.orders
+        .filter(o => o.city === vt.city && o.paid60 && !o.advanceApproved)
+        .map(o => `
+          <div class="card" style="border:2px solid #4f46e5;">
+            <h4 class="card-title">💸 Local Advance Approval (${o.id})</h4>
+            <p style="font-size:11px;">Vendor: <b>${escapeHtml(o.assignedVendorName)}</b> | Deal: ₹${o.vendorDealPrice}</p>
+            <button class="btn btn-emerald" onclick="updOrder('${o.id}',{advanceApproved:true})">Approve Vendor Advance Payout</button>
+          </div>
+        `).join("");
+
+      root.innerHTML = `
+        ${headerHtml}
+        <main class="content">
+          <div class="card-emerald">
+            <span style="font-size:10px;text-transform:uppercase;color:#a7f3d0;font-weight:800;">Lifetime 4% Vendor Network Commission</span>
+            <div style="font-size:28px;font-weight:900;color:#fbbf24;margin-top:4px;">₹${totalComm}</div>
+            <p style="font-size:11px;color:#d1fae5;margin-top:4px;">Linked Verified Vendors: <b>${linkedIds.length}</b> | Completed Orders: <b>${completedJobs.length}</b></p>
+          </div>
+
+          ${pendingApprovalsHtml}
+
+          <div class="card">
+            <h3 class="card-title">🏪 Vendors in ${escapeHtml(vt.city)} (Verify & Claim)</h3>
+            ${cityVendorsHtml || '<p style="font-size:11px;color:#64748b;">No vendors in this city yet.</p>'}
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">+ Onboard New Vendor After Physical Visit</h3>
+            <input id="vtNewVName" class="input" placeholder="Vendor Shop Name *" />
+            <input id="vtNewVMob" type="tel" maxlength="10" class="input" placeholder="Vendor Mobile Number *" />
+            <input id="vtNewVCat" class="input" placeholder="Work Category (e.g. Catering)" />
+            <input id="vtNewVGov" class="input" placeholder="Vendor Aadhaar / PAN *" />
+            <input id="vtNewVAddr" class="input" placeholder="Shop Address *" />
+            <button class="btn btn-primary" onclick="onboardVendorByAgent('${vt.id}','${escapeHtml(vt.state)}','${escapeHtml(vt.city)}')">Register & Link Vendor Now</button>
+          </div>
+        </main>
+      `;
+      return;
+    }
+
+    // ================= PANEL D: ADMIN SUPER-PANEL ONLY =================
+    if (state.user.role === "admin") {
+      const catChips = state.categories.map((c, i) => `
+        <span class="cat-chip">${escapeHtml(c)} <button style="border:none;background:none;font-weight:900;cursor:pointer;color:#4f46e5;" onclick="editCategory(${i})">✎</button></span>
+      `).join("");
+
+      const ordersAdminHtml = state.orders.map(o => {
+        const defaultDeal = Math.round(o.customerPrice * 0.9);
+        const deal = o.vendorDealPrice || defaultDeal;
+        const margin = o.customerPrice - deal;
+        const v4 = Math.round(deal * 0.04);
+        const net = deal - v4;
+        return `
+          <div class="card" style="border:2px solid #4f46e5;">
+            <div style="display:flex;justify-content:space-between;">
+              <b>${o.id} • ${escapeHtml(o.city)}, ${escapeHtml(o.state)}</b>
+              <span class="tag">${o.status}</span>
+            </div>
+            <p style="font-size:11px;color:#475569;"><b>Date:</b> ${o.date} | <b>Category:</b> ${escapeHtml(o.category)}<br/><b>Venue:</b> ${escapeHtml(o.venue)}</p>
+            ${o.sampleImg ? `<img src="${o.sampleImg}" class="preview-img" />` : ''}
+            <div class="info-box">
+              <b>Customer Price:</b> ₹${o.customerPrice}<br/>
+              ${o.status === "WAITING_ADMIN" ? `
+                <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
+                  <span class="label">Set Custom Vendor Deal Price (₹):</span>
+                  <input id="deal_${o.id}" type="number" class="input" value="${defaultDeal}" />
+                  <button class="btn btn-primary" onclick="broadcastToCity('${o.id}')">📢 Broadcast Pop-Up to All ${escapeHtml(o.city)} Vendors</button>
+                </div>
+              ` : `
+                <b>Vendor Deal:</b> ₹${deal} (Admin Margin: ₹${margin})<br/>
+                <b>Verify 4% (from ₹${deal}):</b> ₹${v4} | <b>Vendor Net:</b> ₹${net}<br/>
+                <b>Payments:</b> 60%: ${o.paid60 ? '✅' : '⏳'} | 30%: ${o.paid30 ? '✅' : '⏳'} | 10%+OTP: ${o.completed ? '✅' : '⏳'}
+              `}
+            </div>
+            ${o.paid60 && !o.advanceApproved ? `<button class="btn btn-emerald" onclick="updOrder('${o.id}',{advanceApproved:true})">Approve & Release Advance (Admin Override)</button>` : ''}
+          </div>
+        `;
+      }).join("");
+
+      const vendorManageHtml = state.vendors.map((v, idx) => `
+        <div class="info-box" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;justify-content:space-between;">
+            <b>${escapeHtml(v.name)} (${escapeHtml(v.city)})</b>
+            <span style="font-weight:800;color:${v.kycVerified ? '#059669' : '#d97706'};">${v.kycVerified ? '✅ Verified' : '⏳ Pending'}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:10px;">Category:</span>
+            <input class="input" style="padding:4px 8px;" value="${escapeHtml(v.category)}" onchange="state.vendors[${idx}].category=this.value;" />
+          </div>
+          ${!v.kycVerified ? `<button class="btn-sm btn-indigo" onclick="state.vendors[${idx}].kycVerified=true;render();">Admin Verify Vendor</button>` : ''}
+        </div>
+      `).join("");
+
+      root.innerHTML = `
+        ${headerHtml}
+        <main class="content">
+          <div class="card">
+            <h3 class="card-title">🏷️ Master Event & Vendor Categories</h3>
+            <div>${catChips}</div>
+            <div style="display:flex;gap:6px;">
+              <input id="newCatField" class="input" placeholder="Add official category..." />
+              <button class="btn-sm btn-dark" onclick="addOfficialCategory()">+ Add</button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <h3 class="card-title">📡 Live Customer Leads & City Dispatch</h3>
+            ${ordersAdminHtml || '<div class="card" style="font-size:11px;color:#64748b;text-align:center;">No bookings yet. Login as Customer to create a booking.</div>'}
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">🏪 Pan-India Vendors & Category Correction</h3>
+            ${vendorManageHtml}
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">🖼️ Upload Price-Range Decor Pictures</h3>
+            <input id="admDTitle" class="input" placeholder="Decor Title (e.g. Haldi Marigold Setup)" />
+            <div class="grid-2">
+              <input id="admDMin" type="number" class="input" placeholder="Min Budget (₹)" />
+              <input id="admDMax" type="number" class="input" placeholder="Max Budget (₹)" />
+            </div>
+            <input type="file" accept="image/*" onchange="readImage(this,'admDecorImg')" style="font-size:11px;" />
+            <button class="btn btn-dark" onclick="addDecorGallery()">+ Publish to Customer Budget Gallery</button>
+          </div>
+        </main>
+      `;
+    }
+  }
+
+  // CONTROLLERS
+  function setRole(r) { state.loginRole = r; state.otpSent = false; render(); }
+
+  function handleAuthSubmit() {
+    if (!state.otpSent) {
+      if (state.mobile.length < 10) return alert("Enter valid 10-digit mobile number");
+      state.otpSent = true;
+      render();
+      return;
+    }
+    if (state.otpVal !== "1234") return alert("Enter Demo OTP: 1234");
+    if (state.loginRole === "customer") {
+      state.user = { role: "customer", name: "Customer (" + state.mobile + ")", mobile: state.mobile, id: "CUST-" + state.mobile.slice(-4) };
+    } else if (state.loginRole === "vendor") {
+      const v = state.vendors.find(x => x.mobile === state.mobile) || state.vendors[0];
+      state.user = { role: "vendor", name: v.name, mobile: v.mobile, id: v.id };
+    } else if (state.loginRole === "verify") {
+      const vt = state.verifyTeam.find(x => x.mobile === state.mobile) || state.verifyTeam[0];
+      state.user = { role: "verify", name: vt.name, mobile: vt.mobile, id: vt.id };
+    } else {
+      state.user = { role: "admin", name: "Events360 Super Admin", mobile: state.mobile, id: "ADMIN-01" };
+    }
+    state.otpSent = false;
+    state.otpVal = "";
+    render();
+  }
+
+  function logoutUser() { state.user = null; state.locked = false; state.view = "login"; render(); }
+  function unlockApp() {
+    const val = document.getElementById("pinField").value;
+    if (val === "0000") { state.locked = false; render(); }
+    else alert("Incorrect PIN! Use 0000");
+  }
+
+  function sendHelpTicket() {
+    const msg = document.getElementById("helpInput").value.trim();
+    if (!msg) return;
+    state.tickets.push({ role: state.user.role, msg });
+    render();
+  }
+
+  function submitVendorReg() {
+    const name = document.getElementById("vrName").value.trim();
+    const mob = document.getElementById("vrMob").value.trim();
+    const cat = document.getElementById("vrCat").value.trim() || "General Events";
+    const gov = document.getElementById("vrGov").value.trim();
+    const addr = document.getElementById("vrAddr").value.trim();
+    const soc = document.getElementById("vrSoc").value.trim();
+    if (!name || mob.length < 10 || !gov || !addr) return alert("Please fill Shop Name, 10-digit Mobile, Gov ID, and Address.");
+    state.vendors.push({
+      id: "VND-0" + (state.vendors.length + 1),
+      name, mobile: mob, state: state.vState, city: state.vCity, category: cat,
+      govId: gov, googleAddress: addr, socialLinks: soc || "None",
+      shopPhoto: state.vShopImg ? "Uploaded" : "Pending",
+      kycVerified: false, linkedVerifyId: null, blockedDates: []
+    });
+    if (!state.categories.includes(cat)) state.categories.push(cat);
+    alert("Vendor eKYC Registered! Verify Team & Admin will inspect your shop and activate leads.");
+    state.view = "login";
+    render();
+  }
+
+  function submitVerifyReg() {
+    const name = document.getElementById("vtrName").value.trim();
+    const mob = document.getElementById("vtrMob").value.trim();
+    const gov = document.getElementById("vtrGov").value.trim();
+    if (!name || mob.length < 10 || !gov) return alert("Please fill Name, 10-digit Mobile, and Gov ID.");
+    state.verifyTeam.push({
+      id: "VT-" + (101 + state.verifyTeam.length),
+      name, mobile: mob, state: state.vtState, city: state.vtCity, govId: gov, shopPhoto: "Attached"
+    });
+    alert("Verify Team Agent Registered! Login with your mobile number to verify vendors & earn 4% commission.");
+    state.view = "login";
+    render();
+  }
+
+  function submitCustomerOrder() {
+    if (!state.cVenue.trim()) return alert("Please enter venue name and address.");
+    const newOrd = {
+      id: "EVT-" + Math.floor(1000 + Math.random() * 9000),
+      customerMobile: state.user.mobile,
+      state: state.cState,
+      city: state.cCity,
+      date: state.cDate,
+      venue: state.cVenue.trim(),
+      category: state.cCat || "Custom Event",
+      customerPrice: Number(state.cBudget) || 5000,
+      vendorDealPrice: null,
+      sampleImg: state.cSampleImg,
+      status: "WAITING_ADMIN",
+      assignedVendorId: null,
+      assignedVendorName: null,
+      linkedVerifyId: null,
+      customerSigned: false,
+      vendorSigned: false,
+      paid60: false,
+      paid30: false,
+      advanceApproved: false,
+      photosUploaded: false,
+      otp: "4829",
+      completed: false
+    };
+    state.orders.unshift(newOrd);
+    if (state.cCat && !state.categories.includes(state.cCat)) state.categories.push(state.cCat);
+    alert("Event Request Submitted! Events360 is matching a verified specialist in " + state.cCity + ".");
+    render();
+  }
+
+  function updOrder(id, patch) {
+    state.orders = state.orders.map(o => o.id === id ? Object.assign({}, o, patch) : o);
+    render();
+  }
+
+  function broadcastToCity(id) {
+    const val = Number(document.getElementById("deal_" + id).value);
+    if (!val || val <= 0) return alert("Enter valid Vendor Deal Price");
+    updOrder(id, { vendorDealPrice: val, status: "BROADCASTED" });
+  }
+
+  function acceptLead(orderId, vId, vName, vtId) {
+    updOrder(orderId, { status: "VENDOR_ACCEPTED", assignedVendorId: vId, assignedVendorName: vName, linkedVerifyId: vtId });
+  }
+
+  function verifyVendorOtp(orderId, correctOtp) {
+    const entered = document.getElementById("vOtp_" + orderId).value.trim();
+    if (entered === correctOtp) updOrder(orderId, { completed: true });
+    else alert("Wrong OTP! Ask customer for their 4-digit OTP (" + correctOtp + ").");
+  }
+
+  function blockVendorDate(vId) {
+    const d = document.getElementById("blkDate").value;
+    if (!d) return;
+    state.vendors = state.vendors.map(v => v.id === vId ? Object.assign({}, v, { blockedDates: v.blockedDates.concat(d) }) : v);
+    alert("Date blocked! Lead pop-ups disabled for " + d);
+    render();
+  }
+
+  function verifyAndClaimVendor(vId, vtId) {
+    state.vendors = state.vendors.map(v => v.id === vId ? Object.assign({}, v, { kycVerified: true, linkedVerifyId: vtId }) : v);
+    alert("Vendor verified & merged into your permanent 4% commission list!");
+    render();
+  }
+
+  function onboardVendorByAgent(vtId, st, ct) {
+    const name = document.getElementById("vtNewVName").value.trim();
+    const mob = document.getElementById("vtNewVMob").value.trim();
+    const cat = document.getElementById("vtNewVCat").value.trim() || "Event Services";
+    const gov = document.getElementById("vtNewVGov").value.trim();
+    const addr = document.getElementById("vtNewVAddr").value.trim() || ct;
+    if (!name || mob.length < 10 || !gov) return alert("Fill all required vendor details.");
+    state.vendors.push({
+      id: "VND-0" + (state.vendors.length + 1),
+      name, mobile: mob, state: st, city: ct, category: cat,
+      govId: gov, googleAddress: addr, socialLinks: "Verified Offline",
+      shopPhoto: "Verified_By_Agent", kycVerified: true, linkedVerifyId: vtId, blockedDates: []
+    });
+    alert("New vendor registered & linked to your Verify Team account!");
+    render();
+  }
+
+  function editCategory(idx) {
+    const updated = prompt("Edit / Correct Category Name:", state.categories[idx]);
+    if (updated && updated.trim()) {
+      state.categories[idx] = updated.trim();
+      render();
+    }
+  }
+
+  function addOfficialCategory() {
+    const val = document.getElementById("newCatField").value.trim();
+    if (!val) return;
+    state.categories.push(val);
+    render();
+  }
+
+  function addDecorGallery() {
+    const title = document.getElementById("admDTitle").value.trim();
+    const min = Number(document.getElementById("admDMin").value);
+    const max = Number(document.getElementById("admDMax").value) || min;
+    if (!title || !min) return alert("Enter title and minimum budget");
+    state.gallery.push({ id: state.gallery.length + 1, title, min, max, color: "#0f766e", img: state.admDecorImg });
+    state.admDecorImg = "";
+    alert("Decor design published to Customer Budget Gallery!");
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>
